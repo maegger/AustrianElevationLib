@@ -14,7 +14,7 @@ import java.net.URL;
  */
 public class AustrianElevation {
 
-    public static String url = "https://raw.githubusercontent.com/maegger/";
+    public static String url =  "https://raw.githubusercontent.com/maegger/";
 
     /**
      * input: double x: x-coordinate (EPSG: 3857) 
