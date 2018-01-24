@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Austrian Elevation Service</title>
+        <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://openlayers.org/en/v3.9.0/css/ol.css" type="text/css">
+        <script src="https://openlayers.org/en/v3.9.0/build/ol.js"></script>
+        <script type="text/javascript" src="proj4js-combined.js"></script>
+        <style>
+            .map {
+                background: white;
+                height: 30%;
+                width: 30%;
+            }
+            body, html {
+                height: 100%;
+                width: 100%;
+            }
+            * {
+                font-family:  Arial, Helvetica, sans-serif;
+                padding-left: 3px;
+                padding-right: 3px;
+            }
+        </style>
+    </head>
+    <body >
+        <div style="height: 85%;width: 100%">
+            <h1>Austrian Elevation Service</h1>
+            The "Austrian Elevation Service" is a prototype of a free and open elevation service basing on a Digital Elevation Model (DEM) with 10 Meter resolution. The service is basing on many textfiles with elevation data saved in EPSG: 3857.  
+            The big advantage of this very simple approach is that every programming language can read textfiles. A database or a WMTS/WMS is not required.<br>In the <a href="https://raw.githubusercontent.com/maegger/maegger.github.io/master/getOpenElevation.html"> source code </a> of this website you find an example how to get elevation data with Javascript.<br>
+            The target groups of this service are:
+		<ul style="padding-left: 10px">
+  <li>students</li>
+  <li>sole trader business</li>
+  <li>geologists, biologists, historians, office, ...</li>
+  <li>associations</li>
+  <li>small communes</li>
+			<li>specialized departments of big organisations</li>
+  <li>developer, who need gis-functions for their it-project</li>
+</ul> 
+		
+		
+		
+		
+		
+		It is very easy for developer to use this elevation service with Open Street Map:<br>
+<br>
+<div id="z">Click into the map to get elevation data in Austria.</div><br>
+            <div id="map" class="map"></div><br>
+        
+             Data source of elevation data for this prototype: <a href="http://geoland.at"> geoland.at</a>. <br><br>
+		
+		Copyright (c) 2017, Manfred Egger. You find licence information of this elevation service  <a href="https://github.com/maegger/maegger.github.io/blob/master/LICENSE">HERE </a><br><a align="right" href="https://egger-gis.at"><img src="logo.png"></a>
+            
+        </div>
+        <script>
+            
+            map = new ol.Map({ 
+ 				layers : [new ol.layer.Tile({ 
+ 					source : new ol.source.OSM() 
+ 				})], 
+ 				target : 'map', 
+				controls : ol.control.defaults({ 
+					attributionOptions : /** @type {olx.control.AttributionOptions} */( { 
+ 						collapsible : false 
+					}) 
+				}), 
+				view : new ol.View({ 
+				 center: [1822642,	6141614],
+				zoom : 17
+					 
+				}) 
+			}); 
+            
+           
+            
+            map.on('click', function (evt) {
+                nodata = false;
+                var coord = evt.coordinate;
+                var x = coord[0];
+                var database = "";
+                var mod_x_path = x % 20000;
+                path_x = x - mod_x_path;
+                var y = coord[1];
+                database = path_x ;
+                var mod_y = y % 10;
+                var raster_y = y - mod_y;
+                var mod_x = x % 10;
+                var raster_x = x - mod_x;
+                var txtFile = new XMLHttpRequest();
+                txtFile.open("GET", "https://raw.githubusercontent.com/maegger/" + database + "/master/" + raster_y + ".txt", true);
+                txtFile.onreadystatechange = function () {
+                    if (txtFile.readyState === 4) {
+                        // Makes sure the document is ready to parse.
+                        if (txtFile.status === 200) {
+                            // Makes sure it's found the file.
+                            inhalt = txtFile.responseText;
+                            liste = inhalt.split("\n");
+                            var arrayLength = liste.length;
+                            var len = raster_x + "";
+				document.getElementById("z").innerHTML = "No data...";
+                            for (var i = 0; i < arrayLength; i++) {
+                                var zeile = liste[i];
+                                var res = zeile.substring(0, len.length);
+				    
+                                if (res === len) {
+                                    var hoe = Math.round(zeile.split(" ")[1]);
+                                    document.getElementById("z").innerHTML = "Elevation : " + hoe + " m ";
+                                    break;
+                                } 
+                            }
+                        } else {
+                            document.getElementById("z").innerHTML = "No data...";
+                        }
+                    }
+                }
+                txtFile.send(null);
+            });
+        </script>
+    </body>
+</html>
